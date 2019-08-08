@@ -1,0 +1,36 @@
+pipeline {
+
+    agent any
+    
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building worker app..'
+		dir("worker"){
+                	sh 'mvn compile'
+		}
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Testing worker app..'
+                sleep 3
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                echo 'Packaging worker app..'
+                sleep 7
+            }
+        }
+    }
+
+
+    post {
+        always{
+            echo "This is post step..."
+        }
+    }
+}

@@ -7,6 +7,9 @@ pipeline {
 
     stages {
         stage('Build') {
+	    when{
+		changeset "**/worker/**"
+	    }
             steps {
                 echo 'Building worker app..'
 		dir("worker"){
@@ -16,6 +19,9 @@ pipeline {
         }
         
         stage('Test') {
+	    when{
+		changeset "**/worker/**"
+	    }
             steps {
                 echo 'Testing worker app..'
 		dir("worker"){
@@ -25,6 +31,9 @@ pipeline {
         }
         
         stage('Package') {
+	    when{
+		changeset "**/worker/**"
+	    }
             steps {
                 echo 'Packaging worker app..'
 		dir("worker"){

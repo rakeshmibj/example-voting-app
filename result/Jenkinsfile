@@ -1,39 +1,59 @@
-pipeline {
-
-    agent {
-      docker 'node:8.16-alpine'
-    }
-
-    stages {
-        stage('Build') {
-	    when{
-		changeset "**/result/**"
-	    }
-            steps {
-                echo 'Building result app..'
-		dir("result"){
-                	sh 'npm install'
-		}
+pipeline{
+    agent any 
+    
+    stages{
+        stage("build"){
+            agent {
+              docker{
+                image 'node:8.16-alpine'
+              }
+            }    
+            when{
+              changeset "**/result/**"
+            }
+            steps{
+                echo "Building result app..."
+                dir("result"){
+                  sh 'npm install'
+                }
             }
         }
-        
-        stage('Test') {
-	    when{
-		changeset "**/result/**"
-	    }
-            steps {
-                echo 'Testing result app..'
-		dir("result"){
-                	sh 'npm test'
-		}
+        stage("test"){
+            agent {
+              docker{
+                image 'node:8.16-alpine'
+              }
+            }    
+            when{
+              changeset "**/result/**"
+            }
+            steps{
+                echo "Testing result app..."
+                dir("result"){
+                  sh 'npm test'
+                }
             }
         }
-        
+        stage('docker-package'){
+          agent any
+          when{
+             changeset "**/result/**"
+          }
+            steps{
+                echo 'Packaging result app with docker'
+                script{
+                   docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
+                   def resultImage = docker.build("rakeshmibj/result:v${env.BUILD_ID}", "./result")
+                   resultImage.push()
+                   resultImage.push("latest")
+                   }
+                } 
+            }
+        }
     }
-
-    post {
+    post{
         always{
-            echo "Building multibranch pipeline for worker is completed"
+            echo "This pipeline run is completed.."
         }
     }
 }
